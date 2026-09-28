@@ -4,6 +4,7 @@ import Problem from './components/Problem'
 import Solution from './components/Solution'
 import ThreeUnits from './components/ThreeUnits'
 import RoundaboutSpotlight from './components/RoundaboutSpotlight'
+import ModelViewer from './components/ModelViewer'
 import HowItWorks from './components/HowItWorks'
 import LiveDashboard from './components/LiveDashboard'
 import AIDecisionEngine from './components/AIDecisionEngine'
@@ -27,6 +28,7 @@ function App() {
         <Solution />
         <ThreeUnits />
         <RoundaboutSpotlight />
+        <ModelViewer />
         <HowItWorks />
         <LiveDashboard />
         <AIDecisionEngine />
