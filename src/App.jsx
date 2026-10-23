@@ -1,3 +1,7 @@
+import React, { useState, useEffect } from 'react'
+import { AECCProvider } from './context/AECCContext'
+import OperationsConsole from './components/console/OperationsConsole'
+
 import Navbar from './components/Navbar'
 import Hero from './components/Hero'
 import Problem from './components/Problem'
@@ -19,31 +23,55 @@ import FinalCTA from './components/FinalCTA'
 import Footer from './components/Footer'
 
 function App() {
+  const [isConsoleMode, setIsConsoleMode] = useState(() => {
+    return typeof window !== 'undefined' && window.location.hash.startsWith('#console');
+  });
+
+  useEffect(() => {
+    const handleHash = () => {
+      setIsConsoleMode(window.location.hash.startsWith('#console'));
+    };
+    window.addEventListener('hashchange', handleHash);
+    return () => window.removeEventListener('hashchange', handleHash);
+  }, []);
+
   return (
-    <div className="min-h-screen bg-surface antialiased">
-      <Navbar />
-      <main className="w-full pt-16">
-        <Hero />
-        <Problem />
-        <Solution />
-        <ThreeUnits />
-        <RoundaboutSpotlight />
-        <ModelViewer />
-        <HowItWorks />
-        <LiveDashboard />
-        <AIDecisionEngine />
-        <SystemArchitecture />
-        <SafetyFailsafe />
-        <Simulation />
-        <Impact />
-        <Innovation />
-        <Research />
-        <Team />
-        <FinalCTA />
-      </main>
-      <Footer />
-    </div>
-  )
+    <AECCProvider>
+      {isConsoleMode ? (
+        <OperationsConsole
+          onExit={() => {
+            window.location.hash = '#hero';
+            setIsConsoleMode(false);
+          }}
+        />
+      ) : (
+        <div className="min-h-screen bg-surface antialiased">
+          <Navbar />
+          <main className="w-full pt-16">
+            <Hero />
+            <Problem />
+            <Solution />
+            <ThreeUnits />
+            <RoundaboutSpotlight />
+            <ModelViewer />
+            <HowItWorks />
+            <LiveDashboard />
+            <AIDecisionEngine />
+            <SystemArchitecture />
+            <SafetyFailsafe />
+            <Simulation />
+            <Impact />
+            <Innovation />
+            <Research />
+            <Team />
+            <FinalCTA />
+          </main>
+          <Footer />
+        </div>
+      )}
+    </AECCProvider>
+  );
 }
 
 export default App
+

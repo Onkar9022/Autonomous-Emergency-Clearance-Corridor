@@ -28,10 +28,10 @@ export default function FinalCTA() {
 
               <div className="flex flex-wrap items-center gap-3">
                 <a
-                  href="#simulation"
+                  href="#console/dashboard"
                   className="inline-flex items-center gap-2 px-8 py-4 rounded-xl bg-corridor text-white text-[14px] font-bold shadow-lg hover:bg-corridor-dark transition-all active:translate-y-px"
                 >
-                  <span>Launch Live Simulation</span>
+                  <span>Launch Operations Console</span>
                   <ArrowRight className="w-4 h-4" />
                 </a>
                 <a

@@ -6,6 +6,7 @@ const primaryLinks = [
   { label: 'Overview', href: '#hero' },
   { label: '3 Units', href: '#three-units' },
   { label: 'How It Works', href: '#how-it-works' },
+  { label: 'Operations Console', href: '#console/dashboard' },
   { label: 'Live Dashboard', href: '#dashboard' },
   { label: 'Simulation', href: '#simulation' },
 ];
@@ -155,10 +156,10 @@ export default function Navbar() {
 
           {/* CTA */}
           <a
-            href="#simulation"
+            href="#console/dashboard"
             className="hidden sm:inline-flex items-center gap-1.5 px-5 py-2.5 rounded-lg bg-corridor text-white text-[13px] font-bold hover:bg-corridor-dark transition-all shadow-[0_2px_8px_rgba(34,160,107,0.25)] active:translate-y-px whitespace-nowrap"
           >
-            Launch Simulation
+            Operations Console
             <ArrowRight className="w-4 h-4" />
           </a>
 

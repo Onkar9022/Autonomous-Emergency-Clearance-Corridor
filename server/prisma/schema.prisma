@@ -1,0 +1,238 @@
+// AECC PostgreSQL Prisma Schema
+// Autonomous Emergency Corridor Creator System
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DATABASE_URL_UNPOOLED")
+}
+
+enum Role {
+  ADMINISTRATOR
+  EMERGENCY_OPERATOR
+  READ_ONLY_OBSERVER
+}
+
+enum AmbulanceStatus {
+  AVAILABLE
+  DISPATCHED
+  EN_ROUTE
+  AT_HOSPITAL
+  MAINTENANCE
+}
+
+enum SeverityTier {
+  CRITICAL
+  HIGH
+  MEDIUM
+  LOW
+}
+
+enum IncidentStatus {
+  REPORTED
+  DISPATCHED
+  EN_ROUTE
+  CORRIDOR_ACTIVE
+  RESOLVED
+  CANCELLED
+}
+
+enum CorridorStatus {
+  PLANNED
+  REQUESTED
+  ACTIVE
+  RELEASED
+}
+
+enum SignalState {
+  RED
+  AMBER
+  GREEN
+  PRIORITY_ACTIVE
+  OFFLINE
+}
+
+model User {
+  id           String             @id @default(cuid())
+  email        String             @unique
+  passwordHash String
+  fullName     String
+  role         Role               @default(EMERGENCY_OPERATOR)
+  department   String?            @default("Emergency Dispatch Centre")
+  isActive     Boolean            @default(true)
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+  incidents    Incident[]         @relation("ReportedByUser")
+  auditLogs    IncidentAuditLog[]
+
+  @@map("users")
+}
+
+model Hospital {
+  id                     String          @id
+  name                   String
+  shortName              String
+  lat                    Float
+  lng                    Float
+  address                String
+  phone                  String?
+  category               String
+  traumaLevel            String
+  hasICU                 Boolean         @default(true)
+  hasCardiac             Boolean         @default(false)
+  hasBurnUnit            Boolean         @default(false)
+  totalBeds              Int             @default(100)
+  availableBedsSimulated Int?
+  capacitySource         String          @default("Municipal Health Directorate (Simulated Live Feed)")
+  isVerifiedSource       Boolean         @default(false)
+  status                 String          @default("Operational")
+  lastVerified           String?         @default("5 mins ago")
+  createdAt              DateTime        @default(now())
+  updatedAt              DateTime        @updatedAt
+  incidents              Incident[]
+  corridors              GreenCorridor[]
+
+  @@map("hospitals")
+}
+
+model Ambulance {
+  id                    String          @id
+  callSign              String
+  type                  String
+  status                AmbulanceStatus @default(AVAILABLE)
+  lat                   Float
+  lng                   Float
+  baseStation           String
+  driverName            String
+  driverPhone           String
+  equipment             String[]
+  fuelBatteryPercent    Int             @default(90)
+  speedKmH              Float           @default(0)
+  assignedIncidentId    String?         @unique
+  assignedIncident      Incident?       @relation("AssignedAmbulance", fields: [assignedIncidentId], references: [id], onDelete: SetNull)
+  createdAt             DateTime        @default(now())
+  updatedAt             DateTime        @updatedAt
+  corridors             GreenCorridor[]
+
+  @@map("ambulances")
+}
+
+model Incident {
+  id                     String             @id
+  category               String
+  severity               SeverityTier       @default(CRITICAL)
+  status                 IncidentStatus     @default(REPORTED)
+  lat                    Float
+  lng                    Float
+  address                String
+  patientReference       String?
+  patientCount           Int                @default(1)
+  medicalRequirements    String?
+  reportingSource        String             @default("Municipal 112 Dispatch")
+  notes                  String?
+  destinationHospitalId  String?
+  destinationHospital    Hospital?          @relation(fields: [destinationHospitalId], references: [id], onDelete: SetNull)
+  assignedAmbulance      Ambulance?         @relation("AssignedAmbulance")
+  timeSavedMinutes       Int                @default(0)
+  totalTravelMinutes     Int                @default(0)
+  reportedById           String?
+  reportedBy             User?              @relation("ReportedByUser", fields: [reportedById], references: [id], onDelete: SetNull)
+  selectedRouteId        String?
+  routes                 RouteAlternative[]
+  corridorPlan           GreenCorridor?
+  auditLogs              IncidentAuditLog[]
+  createdAt              DateTime           @default(now())
+  completedAt            DateTime?
+  updatedAt              DateTime           @updatedAt
+
+  @@index([status])
+  @@index([createdAt])
+  @@map("incidents")
+}
+
+model RouteAlternative {
+  id                  String   @id @default(cuid())
+  incidentId          String
+  incident            Incident @relation(fields: [incidentId], references: [id], onDelete: Cascade)
+  routeIndex          Int
+  name                String
+  geometryJson        String   @db.Text
+  distanceKm          Float
+  durationMinutes     Int
+  congestionLevel     String
+  signalCount         Int
+  score               Float
+  scoreBreakdownJson  String?  @db.Text
+  source              String
+  restrictions        String?
+  estTimeSavedMinutes Int      @default(0)
+  isSelected          Boolean  @default(false)
+  createdAt           DateTime @default(now())
+
+  @@index([incidentId])
+  @@map("route_alternatives")
+}
+
+model GreenCorridor {
+  id                  String         @id
+  incidentId          String         @unique
+  incident            Incident       @relation(fields: [incidentId], references: [id], onDelete: Cascade)
+  status              CorridorStatus @default(PLANNED)
+  ambulanceId         String?
+  ambulance           Ambulance?     @relation(fields: [ambulanceId], references: [id], onDelete: SetNull)
+  hospitalId          String?
+  hospital            Hospital?      @relation(fields: [hospitalId], references: [id], onDelete: SetNull)
+  signalsSequenceJson String         @db.Text
+  activatedAt         DateTime?
+  releasedAt          DateTime?
+  createdAt           DateTime       @default(now())
+  updatedAt           DateTime       @updatedAt
+
+  @@map("green_corridors")
+}
+
+model TrafficSignal {
+  id               String      @id
+  intersectionName String
+  lat              Float
+  lng              Float
+  state            SignalState @default(RED)
+  connectivity     String      @default("Simulated Loopback")
+  operatingMode    String      @default("Adaptive NTCIP")
+  hardwareProto    String      @default("ESP32-V2X (Simulated)")
+  activeCorridorId String?
+  lastAck          String      @default("1 sec ago")
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+
+  @@map("traffic_signals")
+}
+
+model IncidentAuditLog {
+  id         String    @id @default(cuid())
+  incidentId String?
+  incident   Incident? @relation(fields: [incidentId], references: [id], onDelete: SetNull)
+  userId     String?
+  user       User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+  category   String
+  severity   String
+  message    String    @db.Text
+  timestamp  DateTime  @default(now())
+
+  @@index([incidentId])
+  @@index([timestamp])
+  @@map("incident_audit_logs")
+}
+
+model SystemSetting {
+  key         String   @id
+  value       String   @db.Text
+  description String?
+  updatedAt   DateTime @updatedAt
+
+  @@map("system_settings")
+}

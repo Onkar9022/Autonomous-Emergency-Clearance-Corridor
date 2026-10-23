@@ -71,13 +71,21 @@ export default function Simulation() {
                 <span className="text-[18px] font-bold text-navy block">Test Scenario: Critical Cardiac Transit (Priority 1)</span>
                 <span className="text-[12px] text-muted">Vehicle: AECC-EMS-402 | Destination: Metro Health Trauma Unit</span>
               </div>
-              <button
-                onClick={handleClick}
-                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-corridor text-white text-[14px] font-bold shadow-md hover:bg-corridor-dark transition-all active:translate-y-px pulse-glow"
-              >
-                <Zap className="w-5 h-5" />
-                <span>{started ? current.btn : 'START EMERGENCY SCENARIO'}</span>
-              </button>
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  onClick={handleClick}
+                  className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-corridor text-white text-[14px] font-bold shadow-md hover:bg-corridor-dark transition-all active:translate-y-px pulse-glow"
+                >
+                  <Zap className="w-5 h-5" />
+                  <span>{started ? current.btn : 'START EMERGENCY SCENARIO'}</span>
+                </button>
+                <a
+                  href="#console/dashboard"
+                  className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-navy text-white text-[13px] font-bold shadow-md hover:bg-navy-light transition-all active:translate-y-px"
+                >
+                  <span>Launch Operations Console →</span>
+                </a>
+              </div>
             </div>
 
             {/* Progress */}

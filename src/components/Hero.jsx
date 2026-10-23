@@ -48,9 +48,9 @@ export default function Hero() {
 
           <ScrollFade delay={0.25}>
             <div className="flex flex-wrap items-center gap-3 mb-10">
-              <a href="#simulation" className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-corridor text-white text-[14px] font-bold shadow-md hover:bg-corridor-dark transition-all active:translate-y-px">
-                <span>Launch Simulation</span>
-                <Play className="w-4 h-4" />
+              <a href="#console/dashboard" className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-corridor text-white text-[14px] font-bold shadow-md hover:bg-corridor-dark transition-all active:translate-y-px">
+                <span>Operations Console</span>
+                <Play className="w-4 h-4 fill-current" />
               </a>
               <a href="#three-units" className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-white text-navy text-[14px] font-bold shadow-sm hover:bg-surface-alt transition-all active:translate-y-px">
                 <span>Explore 3 Units</span>
